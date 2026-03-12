@@ -73,7 +73,7 @@ function CheckoutContent() {
                 items: itemsDescription
             };
 
-            const response = await fetch("http://https://swat-garden-center.onrender.com/checkout", {
+            const response = await fetch("https://swat-garden-center.onrender.com/checkout", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
