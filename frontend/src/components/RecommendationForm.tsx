@@ -30,7 +30,7 @@ export default function RecommendationForm() {
         setRecommendations([]);
 
         try {
-            const response = await fetch("http://localhost:8000/recommend", {
+            const response = await fetch("https://swat-garden-center.onrender.com/recommend", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

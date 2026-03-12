@@ -37,7 +37,7 @@ export default function PhysicalSalesPage() {
         setIsLoading(true);
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch("http://localhost:8000/admin/physical-sales", {
+            const response = await fetch("https://swat-garden-center.onrender.com/admin/physical-sales", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -62,8 +62,8 @@ export default function PhysicalSalesPage() {
         try {
             const token = localStorage.getItem("admin_token");
             const url = editRecordId
-                ? `http://localhost:8000/admin/physical-sales/${editRecordId}`
-                : "http://localhost:8000/admin/physical-sales";
+                ? `https://swat-garden-center.onrender.com/admin/physical-sales/${editRecordId}`
+                : "https://swat-garden-center.onrender.com/admin/physical-sales";
 
             const method = editRecordId ? "PUT" : "POST";
 
@@ -100,7 +100,7 @@ export default function PhysicalSalesPage() {
         if (!id) return;
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch(`http://localhost:8000/admin/physical-sales/${id}`, {
+            const response = await fetch(`https://swat-garden-center.onrender.com/admin/physical-sales/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -142,7 +142,7 @@ export default function PhysicalSalesPage() {
     const handleExport = async () => {
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch("http://localhost:8000/admin/physical-sales/export", {
+            const response = await fetch("https://swat-garden-center.onrender.com/admin/physical-sales/export", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

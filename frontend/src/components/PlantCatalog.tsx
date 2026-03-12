@@ -42,8 +42,8 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
         async function fetchCatalogData() {
             try {
                 const [plantsRes, toolsRes] = await Promise.all([
-                    fetch("http://localhost:8000/plants"),
-                    fetch("http://localhost:8000/tools")
+                    fetch("https://swat-garden-center.onrender.com/plants"),
+                    fetch("https://swat-garden-center.onrender.com/tools")
                 ]);
 
                 if (!plantsRes.ok || !toolsRes.ok) {

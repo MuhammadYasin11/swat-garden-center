@@ -58,9 +58,9 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const [plantsRes, toolsRes, ordersRes] = await Promise.all([
-                fetch("http://localhost:8000/plants"),
-                fetch("http://localhost:8000/tools"),
-                fetch("http://localhost:8000/admin/orders", {
+                fetch("https://swat-garden-center.onrender.com/plants"),
+                fetch("https://swat-garden-center.onrender.com/tools"),
+                fetch("https://swat-garden-center.onrender.com/admin/orders", {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -142,8 +142,8 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const url = activeTab === "plants"
-                ? "http://localhost:8000/admin/plants/delete"
-                : `http://localhost:8000/admin/tools/${encodeURIComponent(itemName)}`;
+                ? "https://swat-garden-center.onrender.com/admin/plants/delete"
+                : `https://swat-garden-center.onrender.com/admin/tools/${encodeURIComponent(itemName)}`;
 
             const options: any = {
                 method: "DELETE",
@@ -208,11 +208,11 @@ export default function AdminDashboard() {
 
             const url = isPlant
                 ? isEdit
-                    ? "http://localhost:8000/admin/plants/edit"
-                    : "http://localhost:8000/admin/plants/add"
+                    ? "https://swat-garden-center.onrender.com/admin/plants/edit"
+                    : "https://swat-garden-center.onrender.com/admin/plants/add"
                 : isEdit
-                    ? "http://localhost:8000/admin/tools/edit"
-                    : "http://localhost:8000/admin/tools";
+                    ? "https://swat-garden-center.onrender.com/admin/tools/edit"
+                    : "https://swat-garden-center.onrender.com/admin/tools";
 
             const res = await fetch(url, {
                 method: isEdit ? "PUT" : "POST",
@@ -248,8 +248,8 @@ export default function AdminDashboard() {
             payload.append("file", file);
 
             const url = targetTab === "plants"
-                ? "http://localhost:8000/admin/plants/bulk-import"
-                : "http://localhost:8000/admin/tools/bulk-import";
+                ? "https://swat-garden-center.onrender.com/admin/plants/bulk-import"
+                : "https://swat-garden-center.onrender.com/admin/tools/bulk-import";
 
             const res = await fetch(url, {
                 method: "POST",

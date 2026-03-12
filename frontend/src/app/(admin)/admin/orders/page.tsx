@@ -29,7 +29,7 @@ export default function AdminOrders() {
     const fetchOrders = async () => {
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch("http://localhost:8000/admin/orders", {
+            const response = await fetch("https://swat-garden-center.onrender.com/admin/orders", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -52,7 +52,7 @@ export default function AdminOrders() {
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch("http://localhost:8000/admin/orders/status", {
+            const response = await fetch("https://swat-garden-center.onrender.com/admin/orders/status", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default function AdminOrders() {
 
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch(`http://localhost:8000/admin/orders/${orderId}`, {
+            const response = await fetch(`https://swat-garden-center.onrender.com/admin/orders/${orderId}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` }
             });

@@ -3,7 +3,7 @@ import urllib.error
 import json
 
 req_get = urllib.request.Request(
-    "http://localhost:8000/admin/physical-sales",
+    "https://swat-garden-center.onrender.com/admin/physical-sales",
     headers={"Authorization": "Bearer admin_token"}
 )
 
@@ -23,7 +23,7 @@ try:
             }).encode('utf-8')
             
             req_put = urllib.request.Request(
-                f"http://localhost:8000/admin/physical-sales/{sale_id}",
+                f"https://swat-garden-center.onrender.com/admin/physical-sales/{sale_id}",
                 data=put_payload,
                 headers={
                     "Authorization": "Bearer admin_token",
