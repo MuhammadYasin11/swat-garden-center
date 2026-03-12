@@ -1,6 +1,6 @@
 plant_id,plant_name,category,Type,light_requirement,water_frequency,temp_min,temp_max,maintenance_level,growth_rate,price,stock_quantity,expert_score,water_score,maintenance_score,temp_range,sustainability_score,image_url
-1.0,Ficus pumilo (bag),outdoor,creeper,medium,Weekly,60,85,medium,medium,100,100,10.0,1.0,2.0,25,5.906976744186046,http://127.0.0.1:8000/uploads/images.webp
-2.0,"Golden Shower plant 12""",outdoor,creeper,medium,Weekly,60,85,medium,medium,1200,5,10.0,1.0,2.0,25,5.906976744186046,http://127.0.0.1:8000/uploads/images (1).webp
+1.0,Ficus pumilo (bag),outdoor,creeper,medium,Weekly,60,85,medium,medium,100,100,10.0,1.0,2.0,25,5.906976744186046,http://https://swat-garden-center.onrender.com/uploads/images.webp
+2.0,"Golden Shower plant 12""",outdoor,creeper,medium,Weekly,60,85,medium,medium,1200,5,10.0,1.0,2.0,25,5.906976744186046,http://https://swat-garden-center.onrender.com/uploads/images (1).webp
 3.0,Virginia creeper,outdoor,creeper,medium,3days,5,45,medum,medium,500,5,10.0,3.0,1.0,40,8.651162790697676,
 4.0,Orange flower creeper,outdoor,creeper,medium,3days,5,45,medum,medium,1200,5,10.0,3.0,1.0,40,8.651162790697676,
 5.0,Rose/gulab (bag),outdoor,creeper,high,3days,2,45,medum,medium,150,100,9.0,3.0,1.0,43,9.0,

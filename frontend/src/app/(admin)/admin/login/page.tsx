@@ -19,7 +19,7 @@ export default function AdminLogin() {
             formData.append("username", username);
             formData.append("password", password);
 
-            const response = await fetch("http://127.0.0.1:8000/token", {
+            const response = await fetch("http://https://swat-garden-center.onrender.com/token", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData,
