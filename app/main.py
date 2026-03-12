@@ -29,7 +29,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # Configure CORS to allow frontend connections
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://admin.localhost:3000"],  # Allows Next.js frontend
+    allow_origins=["*"],  # Allows ANY website to talk to your API safely
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -198,7 +198,7 @@ async def add_plant(
             file_path = f"uploads/{image.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-            image_url = f"http://127.0.0.1:8000/uploads/{image.filename}"
+            image_url = f"https://swat-garden-center.onrender.com/uploads/{image.filename}"
 
         plant_dict = {
             "plant_name": plant_name,
@@ -269,7 +269,7 @@ async def edit_plant_endpoint(
             file_path = f"uploads/{image.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-            updated_data["image_url"] = f"http://127.0.0.1:8000/uploads/{image.filename}"
+            updated_data["image_url"] = f"https://swat-garden-center.onrender.com/uploads/{image.filename}"
 
         recommender.edit_plant(original_plant_name, updated_data)
         return {"message": f"Plant {plant_name} updated successfully."}
@@ -441,7 +441,7 @@ async def add_tool(
             file_path = f"uploads/{image.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-            tool_data["image_url"] = f"http://127.0.0.1:8000/uploads/{image.filename}"
+            tool_data["image_url"] = f"https://swat-garden-center.onrender.com/uploads/{image.filename}"
         
         success, message = tool_manager.add_tool(tool_data)
         if not success:
@@ -478,7 +478,7 @@ async def edit_tool(
             file_path = f"uploads/{image.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-            updated_data["image_url"] = f"http://127.0.0.1:8000/uploads/{image.filename}"
+            updated_data["image_url"] = f"https://swat-garden-center.onrender.com/uploads/{image.filename}"
 
         success, message = tool_manager.edit_tool(original_tool_name, updated_data)
         if not success:
