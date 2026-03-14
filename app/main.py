@@ -298,19 +298,79 @@ async def bulk_import_plants(
     file: UploadFile = File(...),
     admin: User = Depends(get_admin_user)
 ):
-    if not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
+    if not file.filename.endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls) files are allowed.")
         
     try:
         contents = await file.read()
-        df_new = pd.read_csv(io.StringIO(contents.decode("utf-8")))
+        df_new = pd.read_excel(io.BytesIO(contents))
         
-        # Validate required columns roughly
-        if "plant_name" not in df_new.columns:
-            raise ValueError("CSV must contain a 'plant_name' column.")
+        # 1. Ignore empty columns to prevent shifting
+        df_new.dropna(axis=1, how='all', inplace=True)
+        valid_cols = [c for c in df_new.columns if not str(c).lower().strip().startswith('unnamed')]
+        df_new = df_new[valid_cols]
+        
+        # 2. Clean headers: lowercase and strip hidden spaces
+        df_new.columns = [str(c).strip().lower() for c in df_new.columns]
+        
+        # 3. Map flexible headers
+        header_map = {
+            "name": "plant_name",
+            "title": "plant_name",
+            "ai score": "expert_score",
+            "score": "expert_score",
+            "ai_score": "expert_score",
+            "qty": "stock_quantity",
+            "stock": "stock_quantity",
+            "inventory": "stock_quantity",
+            "type": "Type" 
+        }
+        df_new.rename(columns=header_map, inplace=True)
+        
+        # 4. Positional fallback mapping for stock and score
+        if "stock_quantity" not in df_new.columns and len(df_new.columns) > 4:
+            df_new.rename(columns={df_new.columns[4]: "stock_quantity"}, inplace=True)
+        if "expert_score" not in df_new.columns and len(df_new.columns) > 5:
+            df_new.rename(columns={df_new.columns[5]: "expert_score"}, inplace=True)
             
+        if "plant_name" not in df_new.columns:
+            raise ValueError("Invalid Excel format. The required 'plant_name' or 'Title' column header is missing.")
+            
+        # 5. Iterative row validation & Type conversions
+        valid_rows = []
+        skipped_count = 0
+        
+        for _, row in df_new.iterrows():
+            try:
+                clean_row = {}
+                for col in df_new.columns:
+                    val = row[col]
+                    if pd.isna(val):
+                        clean_row[col] = "Unknown" if df_new[col].dtype == 'object' else 0
+                    elif isinstance(val, str):
+                        clean_row[col] = val.strip()
+                    else:
+                        clean_row[col] = val
+                        
+                # Required field check
+                if not clean_row.get("plant_name") or str(clean_row.get("plant_name")).strip() == "Unknown":
+                    raise ValueError("Missing plant name")
+                    
+                # Explicit conversions - will raise exception on garbage data
+                clean_row["stock_quantity"] = int(float(str(clean_row.get("stock_quantity", 0)).strip() or 0))
+                clean_row["expert_score"] = float(str(clean_row.get("expert_score", 0.0)).strip() or 0.0)
+                
+                valid_rows.append(clean_row)
+            except Exception:
+                skipped_count += 1
+                
+        if not valid_rows:
+            raise ValueError("No valid rows found in the Excel file. All rows were skipped due to formatting errors.")
+            
+        clean_df = pd.DataFrame(valid_rows)
+        
         # Merge with existing
-        recommender.df = pd.concat([recommender.df, df_new], ignore_index=True)
+        recommender.df = pd.concat([recommender.df, clean_df], ignore_index=True)
         recommender.df.drop_duplicates(subset=["plant_name"], keep="last", inplace=True)
         
         # Save to csv
@@ -319,9 +379,12 @@ async def bulk_import_plants(
         # Re-run prep
         recommender.prepare_data()
         
-        return {"message": f"Successfully imported {len(df_new)} plants."}
+        msg = f"Uploaded {len(valid_rows)} plants successfully."
+        if skipped_count > 0:
+            msg += f" (Note: {skipped_count} rows skipped due to formatting errors)."
+        return {"message": msg}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process Excel file: {str(e)}")
 
 # ======================================================
 # Order Management Routes
@@ -501,24 +564,86 @@ async def bulk_import_tools(
     file: UploadFile = File(...),
     admin: User = Depends(get_admin_user)
 ):
-    if not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
+    if not file.filename.endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls) files are allowed.")
         
     try:
         contents = await file.read()
-        df_new = pd.read_csv(io.StringIO(contents.decode("utf-8")))
+        df_new = pd.read_excel(io.BytesIO(contents))
         
-        # Validate required columns roughly
+        # 1. Ignore empty columns to prevent shifting
+        df_new.dropna(axis=1, how='all', inplace=True)
+        valid_cols = [c for c in df_new.columns if not str(c).lower().strip().startswith('unnamed')]
+        df_new = df_new[valid_cols]
+        
+        # 2. Clean headers: lowercase and strip hidden spaces
+        df_new.columns = [str(c).strip().lower() for c in df_new.columns]
+        
+        # 3. Map flexible headers
+        header_map = {
+            "plant_name": "name",
+            "title": "name",
+            "ai score": "expert_score",
+            "score": "expert_score",
+            "ai_score": "expert_score",
+            "qty": "stock_quantity",
+            "stock": "stock_quantity",
+            "inventory": "stock_quantity"
+        }
+        df_new.rename(columns=header_map, inplace=True)
+        
+        # 4. Positional fallback mapping for stock and score
+        if "stock_quantity" not in df_new.columns and len(df_new.columns) > 4:
+            df_new.rename(columns={df_new.columns[4]: "stock_quantity"}, inplace=True)
+        if "expert_score" not in df_new.columns and len(df_new.columns) > 5:
+            df_new.rename(columns={df_new.columns[5]: "expert_score"}, inplace=True)
+
         if "name" not in df_new.columns:
-            raise ValueError("CSV must contain a 'name' column for tools.")
+            raise ValueError("Invalid Excel format. The required 'name' or 'Title' column is missing.")
             
-        success, message = tool_manager.bulk_import_tools(df_new)
+        # 5. Iterative row validation & Type conversions
+        valid_rows = []
+        skipped_count = 0
+        
+        for _, row in df_new.iterrows():
+            try:
+                clean_row = {}
+                for col in df_new.columns:
+                    val = row[col]
+                    if pd.isna(val):
+                        clean_row[col] = "Unknown" if df_new[col].dtype == 'object' else 0
+                    elif isinstance(val, str):
+                        clean_row[col] = val.strip()
+                    else:
+                        clean_row[col] = val
+                        
+                # Required field check
+                if not clean_row.get("name") or str(clean_row.get("name")).strip() == "Unknown":
+                    raise ValueError("Missing tool name")
+                    
+                # Explicit conversions - will raise exception on garbage data
+                clean_row["stock_quantity"] = int(float(str(clean_row.get("stock_quantity", 0)).strip() or 0))
+                clean_row["expert_score"] = float(str(clean_row.get("expert_score", 0.0)).strip() or 0.0)
+                
+                valid_rows.append(clean_row)
+            except Exception:
+                skipped_count += 1
+                
+        if not valid_rows:
+            raise ValueError("No valid rows found in the Excel file. All rows were skipped due to formatting errors.")
+            
+        clean_df = pd.DataFrame(valid_rows)
+            
+        success, message = tool_manager.bulk_import_tools(clean_df)
         if not success:
             raise HTTPException(status_code=400, detail=message)
             
-        return {"message": message}
+        msg = f"Uploaded {len(valid_rows)} tools successfully."
+        if skipped_count > 0:
+            msg += f" (Note: {skipped_count} rows skipped due to formatting errors)."
+        return {"message": msg}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process Tools CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process Tools Excel file: {str(e)}")
 
 # ======================================================
 # Physical Sales Routes

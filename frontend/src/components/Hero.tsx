@@ -31,9 +31,9 @@ export default function Hero() {
                     transition={{ duration: 0.6 }}
                     className="flex flex-col items-center w-full"
                 >
-                    <h1 className="text-[28px] md:text-[40px] lg:text-[46px] font-[800] tracking-tight mb-5 w-full text-center whitespace-nowrap">
-                        <span className="text-[#0d1b2a]">Welcome to </span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00a859] to-emerald-400 drop-shadow-sm pb-1">Swat Garden Center</span>
+                    <h1 className="text-3xl sm:text-[40px] lg:text-[46px] font-[900] tracking-tight mb-5 w-full text-center sm:whitespace-nowrap leading-tight">
+                        <span className="text-[#0d1b2a] block sm:inline">Welcome to </span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00a859] to-emerald-400 drop-shadow-sm pb-1 block sm:inline">Swat Garden Center</span>
                     </h1>
 
                     <p className="text-[17px] md:text-[20px] text-[#4b5563] leading-[1.6] font-normal mx-auto">

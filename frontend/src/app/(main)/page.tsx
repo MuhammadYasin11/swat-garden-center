@@ -53,10 +53,10 @@ export default function Home() {
                 ))}
               </ul>
 
-              <div className="pt-4 flex flex-wrap gap-4">
+              <div className="pt-4 flex flex-col sm:flex-row flex-wrap gap-4 w-full">
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-200 transition-all duration-300 transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:py-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-200 transition-all duration-300 transform hover:-translate-y-0.5"
                 >
                   Contact Our Designers
                 </Link>
@@ -169,7 +169,7 @@ export default function Home() {
           </p>
           <Link
             href="/catalog"
-            className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 transition-all duration-300 transform hover:-translate-y-0.5"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 sm:py-4 rounded-xl bg-primary-600 text-white font-bold hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-200 transition-all duration-300 transform hover:-translate-y-0.5"
           >
             Explore Full Catalog &rarr;
           </Link>

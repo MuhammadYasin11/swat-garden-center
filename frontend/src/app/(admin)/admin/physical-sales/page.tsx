@@ -189,23 +189,23 @@ export default function PhysicalSalesPage() {
 
     return (
         <AdminProtectedRoute>
-            <div className="min-h-screen bg-slate-50 p-8">
+            <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
                 <div className="max-w-6xl mx-auto space-y-6">
                     {/* Header */}
-                    <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <div className="flex items-center gap-5">
-                            <div className="relative w-16 h-16 overflow-hidden rounded-full shadow-sm border border-slate-100 bg-white">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
+                        <div className="flex items-center gap-4 sm:gap-5">
+                            <div className="relative w-12 h-12 sm:w-16 sm:h-16 overflow-hidden rounded-full shadow-sm border border-slate-100 bg-white flex-shrink-0">
                                 <img src="/logo.png" alt="Swat Garden Center Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Physical Sales Tracker</h1>
-                                <p className="text-slate-500 mt-1">Log and monitor your daily in-store nursery sales.</p>
+                                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Physical Sales Tracker</h1>
+                                <p className="text-sm sm:text-base text-slate-500 mt-1">Log and monitor your daily in-store nursery sales.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center w-full sm:w-auto mt-2 sm:mt-0">
                             <Link
                                 href="/admin/dashboard"
-                                className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+                                className="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 Back to Dashboard
@@ -214,7 +214,7 @@ export default function PhysicalSalesPage() {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center">
                             <h3 className="font-semibold text-sm text-slate-500 uppercase tracking-wider">All-Time Total Sales</h3>
                             <p className="text-4xl font-bold text-amber-600 mt-2">Rs. {totalPhysicalRevenue.toFixed(2)}</p>
@@ -230,17 +230,17 @@ export default function PhysicalSalesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="px-5 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+                            className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                         >
                             <PlusCircle size={18} />
                             Log New Physical Sale
                         </button>
                         <button
                             onClick={handleExport}
-                            className="px-5 py-2.5 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+                            className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                         >
                             <Download size={18} />
                             Export to Excel/CSV
@@ -279,41 +279,43 @@ export default function PhysicalSalesPage() {
                                                 <span className="text-emerald-700 font-bold">Net: Rs. {monthNet.toFixed(2)}</span>
                                             </div>
                                         </div>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
+                                        <div className="overflow-x-auto w-full">
+                                            <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
                                                 <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-xs border-b border-slate-200">
                                                     <tr>
-                                                        <th className="px-6 py-3">Date</th>
-                                                        <th className="px-6 py-3">Total Sale (Rs.)</th>
-                                                        <th className="px-6 py-3">Expense (Rs.)</th>
-                                                        <th className="px-6 py-3">Net Sale (Rs.)</th>
-                                                        <th className="px-6 py-3">Description</th>
-                                                        <th className="px-6 py-3 text-right">Actions</th>
+                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Date</th>
+                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Total Sale (Rs.)</th>
+                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Expense (Rs.)</th>
+                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Net Sale (Rs.)</th>
+                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Description</th>
+                                                        <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-200">
                                                     {monthSales.map((sale, idx) => (
                                                         <tr key={sale.id} className="hover:bg-slate-50 transition-colors">
-                                                            <td className="px-6 py-4 font-semibold text-slate-900">{sale.date}</td>
-                                                            <td className="px-6 py-4 font-medium text-amber-700">{sale.total_sale}</td>
-                                                            <td className="px-6 py-4 font-medium text-red-600">{sale.expense}</td>
-                                                            <td className="px-6 py-4 font-bold text-emerald-700">{sale.net_sale}</td>
-                                                            <td className="px-6 py-4 truncate max-w-[300px]" title={sale.description}>{sale.description || <span className="text-slate-300 italic">No description</span>}</td>
-                                                            <td className="px-6 py-4 text-right">
+                                                            <td className="px-4 sm:px-6 py-4 font-semibold text-slate-900">{sale.date}</td>
+                                                            <td className="px-4 sm:px-6 py-4 font-medium text-amber-700">{sale.total_sale}</td>
+                                                            <td className="px-4 sm:px-6 py-4 font-medium text-red-600">{sale.expense}</td>
+                                                            <td className="px-4 sm:px-6 py-4 font-bold text-emerald-700">{sale.net_sale}</td>
+                                                            <td className="px-4 sm:px-6 py-4 min-w-[200px] max-w-[300px] whitespace-normal">
+                                                                <div className="truncate" title={sale.description}>{sale.description || <span className="text-slate-300 italic">No description</span>}</div>
+                                                            </td>
+                                                            <td className="px-4 sm:px-6 py-4 text-right">
                                                                 <div className="flex items-center justify-end gap-2">
                                                                     <button
                                                                         onClick={() => handleEditClick(sale)}
-                                                                        className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                        className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                                         title="Edit Sale"
                                                                     >
-                                                                        <Edit className="w-4 h-4" />
+                                                                        <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                                                                     </button>
                                                                     <button
                                                                         onClick={() => handleDeleteSaleClick(sale.id)}
-                                                                        className="p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                                         title="Delete Sale"
                                                                     >
-                                                                        <Trash2 className="w-4 h-4" />
+                                                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                                                     </button>
                                                                 </div>
                                                             </td>

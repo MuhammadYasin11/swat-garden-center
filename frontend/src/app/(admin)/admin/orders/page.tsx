@@ -120,23 +120,23 @@ export default function AdminOrders() {
 
     return (
         <AdminProtectedRoute>
-            <div className="min-h-screen bg-slate-50 p-8">
+            <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
                 <div className="max-w-6xl mx-auto space-y-6">
                     {/* Header */}
-                    <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <div className="flex items-center gap-5">
-                            <div className="relative w-16 h-16 overflow-hidden rounded-full shadow-sm border border-slate-100 bg-white">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
+                        <div className="flex items-center gap-4 sm:gap-5">
+                            <div className="relative w-12 h-12 sm:w-16 sm:h-16 overflow-hidden rounded-full shadow-sm border border-slate-100 bg-white flex-shrink-0">
                                 <img src="/logo.png" alt="Swat Garden Center Logo" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Order Management</h1>
-                                <p className="text-slate-500 mt-1">View and process customer orders.</p>
+                                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Order Management</h1>
+                                <p className="text-sm sm:text-base text-slate-500 mt-1">View and process customer orders.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center w-full sm:w-auto mt-2 sm:mt-0">
                             <Link
                                 href="/admin/dashboard"
-                                className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
+                                className="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                     <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -148,18 +148,18 @@ export default function AdminOrders() {
 
                     {/* Orders Table */}
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full text-left text-sm text-slate-600 min-w-[1000px]">
                                 <thead className="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider text-xs border-b border-slate-200">
                                     <tr>
-                                        <th className="px-6 py-4">Order ID / Date</th>
-                                        <th className="px-6 py-4">Customer</th>
-                                        <th className="px-6 py-4">WhatsApp</th>
-                                        <th className="px-6 py-4">Address</th>
-                                        <th className="px-6 py-4">Items</th>
-                                        <th className="px-6 py-4">Total</th>
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Order ID / Date</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Customer</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">WhatsApp</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Address</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Items</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Total</th>
+                                        <th className="px-4 py-4 whitespace-nowrap">Status</th>
+                                        <th className="px-4 py-4 text-right whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
@@ -167,51 +167,51 @@ export default function AdminOrders() {
                                         <tr><td colSpan={8} className="text-center py-12 text-slate-400">Loading orders...</td></tr>
                                     ) : orders.map((order, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="font-semibold text-slate-900">{order.order_id}</div>
+                                            <td className="px-4 py-4">
+                                                <div className="font-semibold text-slate-900 leading-tight block">{order.order_id}</div>
                                                 <div className="text-xs text-slate-500 mt-1">
                                                     {new Date(order.date).toLocaleString()}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-4">
                                                 <div className="font-semibold text-slate-900">{order.first_name} {order.last_name}</div>
                                                 <div className="text-sm text-slate-500">{order.email}</div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-4">
                                                 {order.whatsapp ? (
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                                         <a
                                                             href={`https://wa.me/${String(order.whatsapp).replace(/\D/g, "")}`}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-sm font-semibold transition-colors"
+                                                            className="inline-flex max-w-max items-center justify-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-sm font-semibold transition-colors"
                                                             title="Open WhatsApp chat"
                                                         >
                                                             <MessageCircle size={16} />
                                                             Chat
                                                         </a>
-                                                        <span className="text-slate-600 text-sm">{order.whatsapp}</span>
+                                                        <span className="text-slate-600 text-sm whitespace-nowrap">{order.whatsapp}</span>
                                                     </div>
                                                 ) : (
                                                     <span className="text-slate-400 italic">N/A</span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-xs text-slate-500 truncate max-w-[200px]" title={order.address}>{order.address}</div>
+                                            <td className="px-4 py-4 min-w-[200px]">
+                                                <div className="text-xs text-slate-500 leading-snug whitespace-normal" title={order.address}>{order.address}</div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-700 font-medium">
+                                            <td className="px-4 py-4 text-slate-700 font-medium whitespace-normal max-w-[250px]">
                                                 {order.items}
                                             </td>
-                                            <td className="px-6 py-4 font-bold text-slate-900">
+                                            <td className="px-4 py-4 font-bold text-slate-900 whitespace-nowrap">
                                                 Rs. {order.total_amount}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(order.status)}`}>
+                                            <td className="px-4 py-4">
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border whitespace-nowrap ${getStatusStyle(order.status)}`}>
                                                     {getStatusIcon(order.status)}
                                                     {order.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-4 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {order.status === "Pending" && (
                                                         <>

@@ -237,7 +237,7 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetTab: "plants" | "tools") => {
+    const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetTab: "plants" | "tools") => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -258,14 +258,15 @@ export default function AdminDashboard() {
             });
 
             if (res.ok) {
-                setToast({ message: "Bulk upload successful!", type: "success" });
+                const data = await res.json();
+                setToast({ message: data.message || "Bulk upload successful!", type: "success" });
                 fetchData();
             } else {
                 const data = await res.json();
                 setToast({ message: data.detail || "Upload failed.", type: "error" });
             }
         } catch (error) {
-            setToast({ message: "An error occurred during CSV upload.", type: "error" });
+            setToast({ message: "An error occurred during Excel upload.", type: "error" });
         } finally {
             setIsCsvUploading(false);
             e.target.value = '';
@@ -287,18 +288,18 @@ export default function AdminDashboard() {
 
     return (
         <AdminProtectedRoute>
-            <div className="min-h-screen bg-slate-50 p-8">
+            <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
                 <div className="max-w-7xl mx-auto space-y-6">
                     {/* Header */}
-                    <div className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+                            <h1 className="text-xl md:text-3xl font-bold text-slate-900">Admin Dashboard</h1>
                             <p className="text-slate-500 mt-1">Manage your plant and gardening item inventory.</p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full md:w-auto">
                             <button
                                 onClick={() => router.push("/admin/change-password")}
-                                className="px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors flex justify-center items-center gap-2"
                                 title="Change admin password"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -308,7 +309,7 @@ export default function AdminDashboard() {
                             </button>
                             <button
                                 onClick={() => router.push("/admin/physical-sales")}
-                                className="px-5 py-2.5 bg-amber-600 text-white hover:bg-amber-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+                                className="w-full sm:w-auto px-5 py-2.5 bg-amber-600 text-white hover:bg-amber-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md"
                             >
                                 Physical Sales
                             </button>
@@ -318,7 +319,7 @@ export default function AdminDashboard() {
                                     setLastViewedCount(orders.length);
                                     router.push("/admin/orders");
                                 }}
-                                className="relative px-5 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+                                className="relative w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md"
                             >
                                 View Customer Orders
                                 {orders.length > lastViewedCount && (
@@ -330,7 +331,7 @@ export default function AdminDashboard() {
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+                                className="hidden md:block px-5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
                             >
                                 Sign Out
                             </button>
@@ -338,7 +339,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center">
                             <h3 className="font-semibold text-sm text-slate-500 uppercase tracking-wider">Total Revenue</h3>
                             <p className="text-4xl font-bold text-amber-600 mt-2">Rs. {isLoading ? "--" : orders.reduce((sum, o) => o.status === "Delivered" ? sum + (Number(o.total_amount) || 0) : sum, 0)}</p>
@@ -414,8 +415,8 @@ export default function AdminDashboard() {
                     )}
 
                     {/* Dedicated Add Buttons Box */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <button
                                 onClick={() => { setActiveTab("plants"); setIsAddModalOpen(true); }}
                                 className="flex flex-col items-center justify-center p-4 w-full border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all group h-full cursor-pointer shadow-sm hover:shadow"
@@ -431,14 +432,14 @@ export default function AdminDashboard() {
                                 <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700 text-center">Add Gardening Item</span>
                             </button>
                             <label className="flex flex-col items-center justify-center p-4 w-full border-2 border-dashed border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all group cursor-pointer h-full relative shadow-sm hover:shadow">
-                                <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleCsvUpload(e, "plants")} disabled={isCsvUploading} />
+                                <input type="file" accept=".xlsx, .xls" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleExcelUpload(e, "plants")} disabled={isCsvUploading} />
                                 <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{isCsvUploading ? '⏳' : '📊'}</span>
-                                <span className="text-sm font-semibold text-slate-600 group-hover:text-emerald-700 text-center">{isCsvUploading ? 'Uploading...' : 'Add Plant CSV'}</span>
+                                <span className="text-sm font-semibold text-slate-600 group-hover:text-emerald-700 text-center">{isCsvUploading ? 'Uploading...' : 'Add Plant Excel'}</span>
                             </label>
                             <label className="flex flex-col items-center justify-center p-4 w-full border-2 border-dashed border-slate-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all group cursor-pointer h-full relative shadow-sm hover:shadow">
-                                <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleCsvUpload(e, "tools")} disabled={isCsvUploading} />
+                                <input type="file" accept=".xlsx, .xls" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleExcelUpload(e, "tools")} disabled={isCsvUploading} />
                                 <span className="text-2xl mb-2 group-hover:scale-110 transition-transform">{isCsvUploading ? '⏳' : '📄'}</span>
-                                <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700 text-center">{isCsvUploading ? 'Uploading...' : 'Add Item CSV'}</span>
+                                <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700 text-center">{isCsvUploading ? 'Uploading...' : 'Add Item Excel'}</span>
                             </label>
                         </div>
                     </div>
@@ -515,8 +516,8 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-slate-600">
+                        <div className="overflow-x-auto w-full">
+                            <table className="w-full text-left text-sm text-slate-600 min-w-[600px]">
                                 <thead className="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider text-xs border-b border-slate-200">
                                     <tr>
                                         <th className="px-6 py-4">{activeTab === "plants" ? "Plant Name" : "Item Name"}</th>
@@ -537,8 +538,8 @@ export default function AdminDashboard() {
 
                                         return (
                                             <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-slate-900">{name}</td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-4 sm:px-6 py-4 font-medium text-slate-900 break-words">{name}</td>
+                                                <td className="px-4 sm:px-6 py-4">
                                                     <span className="inline-flex items-center px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium">
                                                         {item.category}
                                                     </span>
@@ -550,7 +551,7 @@ export default function AdminDashboard() {
                                                         {item.stock_quantity}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-center text-blue-600 font-medium">{item.expert_score.toFixed(1)}</td>
+                                                <td className="px-6 py-4 text-center text-blue-600 font-medium">{(Number(item.expert_score) || 0).toFixed(1)}</td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="inline-flex items-center gap-1.5">
                                                         <button
@@ -590,8 +591,8 @@ export default function AdminDashboard() {
                 {isAddModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                            <div className="p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur z-10">
-                                <h2 className="text-2xl font-bold text-slate-900">
+                            <div className="p-4 sm:p-6 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur z-10">
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                                     {editingItemName ? "Edit" : "Add New"} {activeTab === "plants" ? "Plant" : "Gardening Item"}
                                 </h2>
                                 <button onClick={() => setIsAddModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
@@ -651,11 +652,11 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="pt-6 border-t border-slate-200 flex justify-end gap-4">
-                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-6 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+                                    <button type="button" onClick={() => setIsAddModalOpen(false)} className="w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
                                         Cancel
                                     </button>
-                                    <button type="submit" className="px-6 py-2 rounded-lg font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-sm">
+                                    <button type="submit" className="w-full sm:w-auto px-6 py-2.5 rounded-lg font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-colors shadow-sm">
                                         {editingItemName ? "Update" : "Save"} {activeTab === "plants" ? "Plant" : "Item"}
                                     </button>
                                 </div>
