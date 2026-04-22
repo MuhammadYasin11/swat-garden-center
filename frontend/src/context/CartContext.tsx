@@ -46,10 +46,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const addToCart = (plant: Plant, imageUrl: string) => {
         setCartItems((prev) => {
-            const existing = prev.find((item) => item.plant_name === plant.plant_name);
+            const existing = prev.find((item) => item.name === plant.name);
             if (existing) {
                 return prev.map((item) =>
-                    item.plant_name === plant.plant_name
+                    item.name === plant.name
                         ? { ...item, cart_quantity: item.cart_quantity + 1 }
                         : item
                 );
@@ -61,7 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const incrementItem = (plantName: string) => {
         setCartItems((prev) =>
             prev.map((item) =>
-                item.plant_name === plantName
+                item.name === plantName
                     ? { ...item, cart_quantity: item.cart_quantity + 1 }
                     : item
             )
@@ -72,7 +72,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCartItems((prev) =>
             prev
                 .map((item) =>
-                    item.plant_name === plantName
+                    item.name === plantName
                         ? { ...item, cart_quantity: item.cart_quantity - 1 }
                         : item
                 )
@@ -81,7 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     const removeFromCart = (plantName: string) => {
-        setCartItems((prev) => prev.filter((item) => item.plant_name !== plantName));
+        setCartItems((prev) => prev.filter((item) => item.name !== plantName));
     };
 
     const clearCart = () => setCartItems([]);

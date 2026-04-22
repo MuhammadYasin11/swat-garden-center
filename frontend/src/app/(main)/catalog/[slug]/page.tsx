@@ -23,15 +23,15 @@ export default function PlantDetailPage() {
   useEffect(() => {
     async function fetchPlants() {
       try {
-        const res = await fetch("https://swat-garden-center.onrender.com/plants");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`);
         if (!res.ok) return;
         const data = await res.json();
-        const found = data.plants.find((p: any) => slugify(p.plant_name) === slug);
+        const found = data.plants.find((p: any) => slugify(p.name) === slug);
         setPlant(found || null);
         if (found?.image_url) {
           setImageUrl(found.image_url);
         } else if (found) {
-          const terms = encodeURIComponent(`${found.plant_name} plant ${found.Type}`.toLowerCase().replace(/ /g, ","));
+          const terms = encodeURIComponent(`${found.name} plant ${found.type}`.toLowerCase().replace(/ /g, ","));
           setImageUrl(`https://source.unsplash.com/600x600/?${terms}`);
         }
       } catch (e) {
@@ -89,7 +89,7 @@ export default function PlantDetailPage() {
           <div className="aspect-square rounded-2xl overflow-hidden bg-white border border-surface-200 shadow-lg">
             <img
               src={imageUrl}
-              alt={plant.plant_name}
+              alt={plant.name}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.currentTarget.src = "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600&q=80";
@@ -103,10 +103,10 @@ export default function PlantDetailPage() {
                 {plant.category}
               </span>
               <span className="px-2.5 py-1 rounded-full bg-surface-200 text-surface-700 text-xs font-medium capitalize">
-                {plant.Type}
+                {plant.type}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-surface-900 mb-4">{plant.plant_name}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-surface-900 mb-4">{plant.name}</h1>
             <div className="flex items-center gap-4 mb-6">
               <span className="flex items-center gap-1.5 text-amber-600 font-semibold">
                 <Star size={18} className="fill-amber-500 text-amber-500" />
@@ -147,7 +147,7 @@ export default function PlantDetailPage() {
                 Add to Cart
               </button>
               <Link
-                href={`/checkout?plant=${encodeURIComponent(plant.plant_name)}&price=${plant.price}&image=${encodeURIComponent(imageUrl)}`}
+                href={`/checkout?plant=${encodeURIComponent(plant.name)}&price=${plant.price}&image=${encodeURIComponent(imageUrl)}`}
                 className="flex-1 px-6 py-4 rounded-xl border-2 border-emerald-600 text-emerald-600 font-semibold flex items-center justify-center hover:bg-emerald-50 transition-colors"
               >
                 Buy Now

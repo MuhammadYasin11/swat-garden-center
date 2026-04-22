@@ -9,7 +9,7 @@ import RecommenderSkeleton from "./RecommenderSkeleton";
 export default function RecommendationForm() {
     const [formData, setFormData] = useState({
         category: "indoor",
-        Type: "foliage",
+        type: "foliage",
         light_requirement: "medium",
         maintenance_level: "low",
         growth_rate: "fast",
@@ -30,7 +30,7 @@ export default function RecommendationForm() {
         setRecommendations([]);
 
         try {
-            const response = await fetch("https://swat-garden-center.onrender.com/recommend", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/recommend`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -190,13 +190,13 @@ export default function RecommendationForm() {
                                     <ul className="space-y-2">
                                         {recommendations.map((rec, i) => (
                                             <li key={i}>
-                                                <Link href={`/catalog?search=${encodeURIComponent(rec.plant_name)}`} className="flex items-center gap-3 bg-primary-50/50 p-3 rounded-xl border border-primary-100/50 hover:bg-primary-50 hover:border-primary-200 transition-colors group cursor-pointer">
+                                                <Link href={`/catalog?search=${encodeURIComponent(rec.name)}`} className="flex items-center gap-3 bg-primary-50/50 p-3 rounded-xl border border-primary-100/50 hover:bg-primary-50 hover:border-primary-200 transition-colors group cursor-pointer">
                                                     <div className="h-8 w-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-sm shrink-0">
                                                         {i + 1}
                                                     </div>
                                                     <div className="flex-grow flex flex-col justify-center">
                                                         <span className="font-semibold text-surface-900 capitalize leading-tight">
-                                                            {rec.plant_name}
+                                                            {rec.name}
                                                         </span>
                                                         <div className="flex items-center gap-4 mt-1.5 text-xs">
                                                             <span className="text-surface-600 font-medium">Rs. {rec.price}</span>

@@ -42,8 +42,8 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
         async function fetchCatalogData() {
             try {
                 const [plantsRes, toolsRes] = await Promise.all([
-                    fetch("https://swat-garden-center.onrender.com/plants"),
-                    fetch("https://swat-garden-center.onrender.com/tools")
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`),
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/tools`)
                 ]);
 
                 if (!plantsRes.ok || !toolsRes.ok) {
@@ -59,7 +59,7 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
 
                 const formattedTools = toolsData.tools.map((t: any) => ({
                     ...t,
-                    plant_name: t.name
+                    name: t.name
                 }));
                 setGardeningTools(formattedTools);
 
@@ -91,9 +91,9 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
 
     let displayedItems = baseData.filter(item => {
         const matchesSearch =
-            item.plant_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.Type || "").toLowerCase().includes(searchQuery.toLowerCase());
+            (item.type || "").toLowerCase().includes(searchQuery.toLowerCase());
 
         if (!matchesSearch) return false;
 
@@ -101,7 +101,7 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
             const p = item as ExtendedPlant;
             if (filters.maxPrice && Number(p.price) > Number(filters.maxPrice)) return false;
             if (filters.light && (p.light_requirement || "").toLowerCase() !== filters.light.toLowerCase()) return false;
-            if (filters.type && (p.Type || "").toLowerCase() !== filters.type.toLowerCase()) return false;
+            if (filters.type && (p.type || "").toLowerCase() !== filters.type.toLowerCase()) return false;
             if (filters.maintenance && (p.maintenance_level || "").toLowerCase() !== filters.maintenance.toLowerCase()) return false;
         }
 
@@ -110,7 +110,7 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
 
     if (limit) displayedItems = displayedItems.slice(0, limit);
 
-    const uniqueTypes = [...new Set(plants.map((p: ExtendedPlant) => (p.Type || "").toLowerCase()).filter(Boolean))].sort();
+    const uniqueTypes = [...new Set(plants.map((p: ExtendedPlant) => (p.type || "").toLowerCase()).filter(Boolean))].sort();
     const uniqueLight = [...new Set(plants.map((p: ExtendedPlant) => (p.light_requirement || "").toLowerCase()).filter(Boolean))].sort();
     const uniqueMaintenance = [...new Set(plants.map((p: ExtendedPlant) => (p.maintenance_level || "").toLowerCase()).filter(Boolean))].sort();
 
@@ -247,7 +247,7 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {displayedItems.map((item, idx) => (
-                            <PlantCard key={`${item.plant_name}-${idx}`} plant={item} index={idx} />
+                            <PlantCard key={`${item.name}-${idx}`} plant={item} index={idx} />
                         ))}
                     </div>
                 )}

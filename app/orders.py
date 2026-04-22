@@ -1,72 +1,71 @@
-import pandas as pd
-import os
 import uuid
 from datetime import datetime
+from sqlalchemy.orm import Session
+from app import models
 
 class OrderManager:
-    def __init__(self, data_file="data/orders.csv"):
-        self.data_file = data_file
-        self._ensure_file_exists()
-        
-    def _ensure_file_exists(self):
-        if not os.path.exists(self.data_file):
-            df = pd.DataFrame(columns=[
-                "order_id", "date", "first_name", "last_name", "whatsapp", "email",
-                "address", "total_amount", "items", "status"
-            ])
-            df.to_csv(self.data_file, index=False)
+    def __init__(self):
+        pass
 
-    def create_order(self, order_data: dict):
-        df = pd.read_csv(self.data_file)
+    def create_order(self, db: Session, order_data: dict):
+        customer_name = f"{order_data.get('first_name', '')} {order_data.get('last_name', '')}".strip()
+        new_order = models.Order(
+            customer_name=customer_name,
+            customer_contact=order_data.get("whatsapp", ""),
+            total_amount=order_data.get("total_amount", 0.0),
+            status="Pending"
+            # created_at defaults to func.now()
+        )
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+        return f"ORD-{new_order.id}"
         
-        # generate unique ID
-        order_id = "ORD-" + str(uuid.uuid4())[:8].upper()
+    def get_all_orders(self, db: Session):
+        orders = db.query(models.Order).order_by(models.Order.created_at.desc()).all()
+        result = []
+        for o in orders:
+            # Parse first/last name
+            parts = o.customer_name.split(" ", 1)
+            first_name = parts[0] if len(parts) > 0 else ""
+            last_name = parts[1] if len(parts) > 1 else ""
+            
+            result.append({
+                "order_id": f"ORD-{o.id}",
+                "date": o.created_at.isoformat() if o.created_at else "",
+                "first_name": first_name,
+                "last_name": last_name,
+                "whatsapp": o.customer_contact,
+                "email": "",
+                "address": "",
+                "total_amount": o.total_amount,
+                "items": "",
+                "status": o.status
+            })
+        return result
         
-        new_row = {
-            "order_id": order_id,
-            "date": datetime.now().isoformat(),
-            "first_name": order_data.get("first_name", ""),
-            "last_name": order_data.get("last_name", ""),
-            "whatsapp": order_data.get("whatsapp", ""),
-            "email": order_data.get("email", ""),
-            "address": order_data.get("address", ""),
-            "total_amount": order_data.get("total_amount", 0),
-            "items": order_data.get("items", ""),
-            "status": "Pending"
-        }
-        
-        new_df = pd.DataFrame([new_row])
-        df = pd.concat([df, new_df], ignore_index=True)
-        df.to_csv(self.data_file, index=False)
-        return order_id
-        
-    def get_all_orders(self):
-        df = pd.read_csv(self.data_file)
-        
-        # Parse missing values back to strings properly if needed
-        # NaN becomes None in JS, but it's better to clean
-        df = df.fillna("")
-        
-        # Sort so newest is at the top
-        df = df.sort_values(by="date", ascending=False)
-        
-        return df.to_dict(orient="records")
-        
-    def update_status(self, order_id: str, new_status: str):
-        df = pd.read_csv(self.data_file)
-        mask = df["order_id"] == order_id
-        if mask.any():
-            idx = df[mask].index[0]
-            df.loc[idx, "status"] = new_status
-            df.to_csv(self.data_file, index=False)
+    def update_status(self, db: Session, order_id_str: str, new_status: str):
+        try:
+            real_id = int(order_id_str.replace("ORD-", ""))
+        except ValueError:
+            return False
+            
+        order = db.query(models.Order).filter(models.Order.id == real_id).first()
+        if order:
+            order.status = new_status
+            db.commit()
             return True
         return False
 
-    def delete_order(self, order_id: str):
-        df = pd.read_csv(self.data_file)
-        mask = df["order_id"] == order_id
-        if mask.any():
-            df = df[~mask]
-            df.to_csv(self.data_file, index=False)
+    def delete_order(self, db: Session, order_id_str: str):
+        try:
+            real_id = int(order_id_str.replace("ORD-", ""))
+        except ValueError:
+            return False
+            
+        order = db.query(models.Order).filter(models.Order.id == real_id).first()
+        if order:
+            db.delete(order)
+            db.commit()
             return True
         return False

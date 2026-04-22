@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Plant {
-    plant_name: string;
+    name: string;
     category: string;
-    Type: string;
+    type: string;
     price: number;
     stock_quantity: number;
     expert_score: number;
@@ -39,7 +39,7 @@ export default function AdminDashboard() {
 
     // Form state corresponding to PlantSchema/ToolSchema
     const [formData, setFormData] = useState({
-        plant_name: "", name: "", category: "Foliage", Type: "Indoor", type: "Hand Tool",
+        name: "", name: "", category: "Foliage", type: "Indoor", type: "Hand Tool",
         light_requirement: "Medium", water_frequency: "Weekly",
         maintenance_level: "Medium", growth_rate: "Medium",
         temp_min: 60, temp_max: 85, price: 25, stock_quantity: 50, expert_score: 4.5,
@@ -58,9 +58,9 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const [plantsRes, toolsRes, ordersRes] = await Promise.all([
-                fetch("https://swat-garden-center.onrender.com/plants"),
-                fetch("https://swat-garden-center.onrender.com/tools"),
-                fetch("https://swat-garden-center.onrender.com/admin/orders", {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/tools`),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/orders`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -98,18 +98,18 @@ export default function AdminDashboard() {
     const handleDeleteClick = (itemName: string) => setDeleteTarget(itemName);
 
     const handleEditClick = (item: any) => {
-        const isPlant = !!item.plant_name;
-        const name = isPlant ? item.plant_name : item.name;
+        const isPlant = !!item.name;
+        const name = isPlant ? item.name : item.name;
         setActiveTab(isPlant ? "plants" : "tools");
         setEditingItemName(name);
 
         if (isPlant) {
             setFormData(prev => ({
                 ...prev,
-                plant_name: item.plant_name,
+                name: item.name,
                 name: "",
                 category: item.category,
-                Type: item.Type,
+                type: item.type,
                 type: prev.type,
                 price: item.price,
                 stock_quantity: item.stock_quantity,
@@ -121,10 +121,10 @@ export default function AdminDashboard() {
         } else {
             setFormData(prev => ({
                 ...prev,
-                plant_name: "",
+                name: "",
                 name: item.name,
                 category: item.category,
-                Type: prev.Type,
+                type: prev.type,
                 type: item.type,
                 price: item.price,
                 stock_quantity: item.stock_quantity,
@@ -142,8 +142,8 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const url = activeTab === "plants"
-                ? "https://swat-garden-center.onrender.com/admin/plants/delete"
-                : `https://swat-garden-center.onrender.com/admin/tools/${encodeURIComponent(itemName)}`;
+                ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/delete`
+                : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/${encodeURIComponent(itemName)}`;
 
             const options: any = {
                 method: "DELETE",
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
 
             if (activeTab === "plants") {
                 options.headers["Content-Type"] = "application/json";
-                options.body = JSON.stringify({ plant_name: itemName });
+                options.body = JSON.stringify({ name: itemName });
             }
 
             const res = await fetch(url, options);
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
 
             if (isEdit) {
                 if (isPlant) {
-                    payload.append("original_plant_name", editingItemName!);
+                    payload.append("original_name", editingItemName!);
                 } else {
                     payload.append("original_tool_name", editingItemName!);
                 }
@@ -208,11 +208,11 @@ export default function AdminDashboard() {
 
             const url = isPlant
                 ? isEdit
-                    ? "https://swat-garden-center.onrender.com/admin/plants/edit"
-                    : "https://swat-garden-center.onrender.com/admin/plants/add"
+                    ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/edit`
+                    : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/add`
                 : isEdit
-                    ? "https://swat-garden-center.onrender.com/admin/tools/edit"
-                    : "https://swat-garden-center.onrender.com/admin/tools";
+                    ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/edit`
+                    : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools`;
 
             const res = await fetch(url, {
                 method: isEdit ? "PUT" : "POST",
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
                 setIsAddModalOpen(false);
                 setEditingItemName(null);
                 fetchData();
-                setFormData({ ...formData, plant_name: "", name: "", price: 25, stock_quantity: 50, image_url: "" });
+                setFormData({ ...formData, name: "", name: "", price: 25, stock_quantity: 50, image_url: "" });
                 setImageFile(null);
             } else {
                 const errData = await res.json().catch(() => ({}));
@@ -248,8 +248,8 @@ export default function AdminDashboard() {
             payload.append("file", file);
 
             const url = targetTab === "plants"
-                ? "https://swat-garden-center.onrender.com/admin/plants/bulk-import"
-                : "https://swat-garden-center.onrender.com/admin/tools/bulk-import";
+                ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/bulk-import`
+                : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/bulk-import`;
 
             const res = await fetch(url, {
                 method: "POST",
@@ -276,13 +276,13 @@ export default function AdminDashboard() {
     const lowStockPlants = plants.filter(p => p.stock_quantity < 10);
     const lowStockTools = tools.filter(t => t.stock_quantity < 10);
     const lowStockItems = [
-        ...lowStockPlants.map(p => ({ ...p, isPlant: true, displayName: p.plant_name })),
+        ...lowStockPlants.map(p => ({ ...p, isPlant: true, displayName: p.name })),
         ...lowStockTools.map(t => ({ ...t, isPlant: false, displayName: t.name }))
     ];
 
     const currentData = activeTab === "plants" ? plants : tools;
     const filteredData = currentData.filter(item => {
-        const name = (item as any).plant_name || (item as any).name;
+        const name = (item as any).name || (item as any).name;
         return name.toLowerCase().includes(searchTerm.toLowerCase()) || item.category.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
@@ -533,8 +533,8 @@ export default function AdminDashboard() {
                                     {isLoading ? (
                                         <tr><td colSpan={7} className="text-center py-8 text-slate-400">Loading inventory...</td></tr>
                                     ) : filteredData.map((item: any, idx: number) => {
-                                        const name = item.plant_name || item.name;
-                                        const type = item.Type || item.type;
+                                        const name = item.name || item.name;
+                                        const type = item.type || item.type;
 
                                         return (
                                             <tr key={idx} className="hover:bg-slate-50 transition-colors">
@@ -607,8 +607,8 @@ export default function AdminDashboard() {
                                     <div className="space-y-2 col-span-1 md:col-span-2">
                                         <label className="text-sm font-semibold text-slate-700">{activeTab === "plants" ? "Plant Name" : "Item Name"}</label>
                                         <input type="text" required className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                            value={activeTab === "plants" ? formData.plant_name : formData.name}
-                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, plant_name: e.target.value }) : setFormData({ ...formData, name: e.target.value })}
+                                            value={activeTab === "plants" ? formData.name : formData.name}
+                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, name: e.target.value }) : setFormData({ ...formData, name: e.target.value })}
                                             placeholder={activeTab === "plants" ? "e.g. Monstera Deliciosa" : "e.g. Premium Trowel"} />
                                     </div>
 
@@ -621,8 +621,8 @@ export default function AdminDashboard() {
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-slate-700">{activeTab === "plants" ? "Type (Indoor/Outdoor)" : "Type (Hand Tool/Power Tool)"}</label>
                                         <input type="text" required className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                            value={activeTab === "plants" ? formData.Type : formData.type}
-                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, Type: e.target.value }) : setFormData({ ...formData, type: e.target.value })} />
+                                            value={activeTab === "plants" ? formData.type : formData.type}
+                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, type: e.target.value }) : setFormData({ ...formData, type: e.target.value })} />
                                     </div>
 
                                     <div className="space-y-2">

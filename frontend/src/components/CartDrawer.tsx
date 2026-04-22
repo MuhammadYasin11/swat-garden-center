@@ -61,14 +61,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <ul className="space-y-3">
                 {cartItems.map((item) => (
                   <li
-                    key={item.plant_name}
+                    key={item.name}
                     className="flex gap-3 p-3 rounded-2xl bg-surface-50 border border-surface-100"
                   >
                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-200 shrink-0">
                       {item.image_url ? (
                         <img
                           src={item.image_url}
-                          alt={item.plant_name}
+                          alt={item.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -80,7 +80,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                       <div>
                         <p className="font-semibold text-surface-900 truncate">
-                          {item.plant_name}
+                          {item.name}
                         </p>
                         <p className="text-xs text-surface-500">
                           Rs. {item.price} × {item.cart_quantity}
@@ -93,7 +93,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex flex-col items-end justify-between gap-1">
                       <div className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 px-2 py-1 bg-white">
                         <button
-                          onClick={() => decrementItem(item.plant_name)}
+                          onClick={() => decrementItem(item.name)}
                           className="w-6 h-6 rounded-full flex items-center justify-center text-surface-600 hover:bg-surface-100"
                           aria-label="Decrease quantity"
                         >
@@ -103,7 +103,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           {item.cart_quantity}
                         </span>
                         <button
-                          onClick={() => incrementItem(item.plant_name)}
+                          onClick={() => incrementItem(item.name)}
                           className="w-6 h-6 rounded-full flex items-center justify-center text-surface-600 hover:bg-surface-100"
                           aria-label="Increase quantity"
                         >
@@ -111,7 +111,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         </button>
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.plant_name)}
+                        onClick={() => removeFromCart(item.name)}
                         className="text-xs text-red-500 hover:text-red-600 font-medium"
                       >
                         Remove

@@ -19,7 +19,7 @@ export default function AdminLogin() {
             formData.append("username", username);
             formData.append("password", password);
 
-            const response = await fetch("https://swat-garden-center.onrender.com/token", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/token`, {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData,

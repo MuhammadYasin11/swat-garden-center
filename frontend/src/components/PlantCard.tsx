@@ -7,9 +7,9 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
 export interface Plant {
-    plant_name: string;
+    name: string;
     category: string;
-    Type: string;
+    type: string;
     price: number;
     stock_quantity: number;
     expert_score: number;
@@ -35,10 +35,10 @@ export default function PlantCard({ plant, index }: { plant: Plant; index: numbe
         } else {
             // Unsplash Source API generates a random image based on search terms.
             // It provides a much more premium feel than Wikipedia thumbnails.
-            const searchTerms = encodeURIComponent(`${plant.plant_name} plant ${plant.Type} indoor`.toLowerCase().replace(/ /g, ','));
+            const searchTerms = encodeURIComponent(`${plant.name} plant ${plant.type} indoor`.toLowerCase().replace(/ /g, ','));
             setImageUrl(`https://source.unsplash.com/500x500/?${searchTerms}`);
         }
-    }, [plant.plant_name, plant.Type, plant.image_url]);
+    }, [plant.name, plant.type, plant.image_url]);
 
     return (
         <motion.div
@@ -52,7 +52,7 @@ export default function PlantCard({ plant, index }: { plant: Plant; index: numbe
                 {imageUrl && (
                     <img
                         src={imageUrl}
-                        alt={plant.plant_name}
+                        alt={plant.name}
                         className="object-cover w-full h-full transform group-hover:scale-110 transition-transform duration-500"
                         onError={(e) => {
                             // High-quality premium fallback image just in case Unsplash acts up
@@ -71,14 +71,14 @@ export default function PlantCard({ plant, index }: { plant: Plant; index: numbe
 
             <div className="p-5 flex flex-col flex-grow">
                 <div className="flex justify-between items-start mb-2">
-                    <Link href={`/catalog/${plant.plant_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="font-bold text-lg text-surface-900 dark:text-surface-50 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1" title={plant.plant_name}>
-                        {plant.plant_name}
+                    <Link href={`/catalog/${plant.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="font-bold text-lg text-surface-900 dark:text-surface-50 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1" title={plant.name}>
+                        {plant.name}
                     </Link>
                     <span className="font-semibold text-lg text-primary-700 dark:text-primary-400 whitespace-nowrap ml-2">Rs. {plant.price}</span>
                 </div>
 
                 <p className="text-sm text-surface-500 dark:text-surface-400 capitalize mb-4">
-                    Type: {plant.Type}
+                    type: {plant.type}
                 </p>
 
                 <div className="mt-auto pt-4 border-t border-surface-100 dark:border-surface-800 flex flex-col gap-3">
@@ -86,7 +86,7 @@ export default function PlantCard({ plant, index }: { plant: Plant; index: numbe
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${plant.stock_quantity > 0 ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
                             {plant.stock_quantity > 0 ? `${plant.stock_quantity} in stock` : "Out of stock"}
                         </span>
-                        <Link href={`/catalog/${plant.plant_name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="text-surface-400 flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="View details">
+                        <Link href={`/catalog/${plant.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}`} className="text-surface-400 flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400 transition-colors" title="View details">
                             <Info size={18} />
                         </Link>
                     </div>
@@ -112,7 +112,7 @@ export default function PlantCard({ plant, index }: { plant: Plant; index: numbe
                                 <span className="text-sm">{added ? "Added" : "Cart"}</span>
                             </button>
                             <Link
-                                href={`/checkout?plant=${encodeURIComponent(plant.plant_name)}&price=${plant.price}&image=${encodeURIComponent(imageUrl)}`}
+                                href={`/checkout?plant=${encodeURIComponent(plant.name)}&price=${plant.price}&image=${encodeURIComponent(imageUrl)}`}
                                 className="w-full py-2 rounded-xl bg-primary-600 text-white font-semibold flex items-center justify-center gap-1.5 hover:bg-primary-700 hover:shadow-md transition-all hover:-translate-y-0.5"
                             >
                                 <CreditCard size={16} />

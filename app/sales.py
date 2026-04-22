@@ -1,79 +1,83 @@
-import pandas as pd
-import os
-import uuid
 from datetime import datetime
+from sqlalchemy.orm import Session
+from app import models
 
 class PhysicalSalesManager:
-    def __init__(self, data_file="data/physical_sales.csv"):
-        self.data_file = data_file
-        self._ensure_file_exists()
-        
-    def _ensure_file_exists(self):
-        if not os.path.exists(self.data_file):
-            df = pd.DataFrame(columns=[
-                "id", "date", "total_sale", "expense", "net_sale", "description"
-            ])
-            df.to_csv(self.data_file, index=False)
+    def __init__(self):
+        pass
 
-    def get_all_sales(self):
-        df = pd.read_csv(self.data_file)
-        
-        # Clean NaNs
-        df = df.fillna("")
-        
-        # Sort so newest is at the top
-        df = df.sort_values(by="date", ascending=False)
-        
-        return df.to_dict(orient="records")
+    def get_all_sales(self, db: Session):
+        sales = db.query(models.PhysicalSale).order_by(models.PhysicalSale.created_at.desc()).all()
+        result = []
+        for s in sales:
+            result.append({
+                "id": f"SALE-{s.id}",
+                "date": s.created_at.strftime("%Y-%m-%d") if s.created_at else "",
+                "total_sale": s.amount,
+                "expense": 0.0,
+                "net_sale": s.amount,  # Simplification matching previous logic without expense tracking in db
+                "description": s.description
+            })
+        return result
 
-    def add_sale(self, sale_data: dict):
-        df = pd.read_csv(self.data_file)
-        
-        sale_id = "SALE-" + str(uuid.uuid4())[:8].upper()
-        
+    def add_sale(self, db: Session, sale_data: dict):
         total_sale = float(sale_data.get("total_sale", 0))
         expense = float(sale_data.get("expense", 0))
-        net_sale = total_sale - expense
+        net_sale = total_sale - expense  # Computed here but DB drops expense
         
-        new_row = {
-            "id": sale_id,
-            "date": sale_data.get("date", datetime.now().strftime("%Y-%m-%d")),
-            "total_sale": total_sale,
-            "expense": expense,
-            "net_sale": net_sale,
-            "description": sale_data.get("description", "")
-        }
-        
-        new_df = pd.DataFrame([new_row])
-        df = pd.concat([df, new_df], ignore_index=True)
-        df.to_csv(self.data_file, index=False)
+        date_str = sale_data.get("date")
+        dt = None
+        if date_str:
+            try:
+                dt = datetime.fromisoformat(date_str)
+            except ValueError:
+                dt = datetime.now()
+                
+        new_sale = models.PhysicalSale(
+            amount=net_sale, # Using net sale for amount to be safe
+            description=sale_data.get("description", ""),
+            created_at=dt
+        )
+        db.add(new_sale)
+        db.commit()
         return True, "Physical sale recorded successfully."
 
-    def update_sale(self, sale_id: str, sale_data: dict):
-        df = pd.read_csv(self.data_file)
-        if sale_id not in df["id"].values:
-            return False, "Sale record not found."
-        
-        idx = df.index[df["id"] == sale_id].tolist()[0]
-        
-        total_sale = float(sale_data.get("total_sale", df.at[idx, "total_sale"]))
-        expense = float(sale_data.get("expense", df.at[idx, "expense"]))
-        net_sale = total_sale - expense
-        
-        df.at[idx, "date"] = sale_data.get("date", df.at[idx, "date"])
-        df.at[idx, "total_sale"] = total_sale
-        df.at[idx, "expense"] = expense
-        df.at[idx, "net_sale"] = net_sale
-        df.at[idx, "description"] = sale_data.get("description", df.at[idx, "description"])
-        
-        df.to_csv(self.data_file, index=False)
-        return True, "Physical sale updated successfully."
-
-    def delete_sale(self, sale_id: str):
-        df = pd.read_csv(self.data_file)
-        if sale_id not in df["id"].values:
+    def update_sale(self, db: Session, sale_id_str: str, sale_data: dict):
+        try:
+            real_id = int(sale_id_str.replace("SALE-", ""))
+        except ValueError:
+            return False, "Invalid sale ID format."
+            
+        sale = db.query(models.PhysicalSale).filter(models.PhysicalSale.id == real_id).first()
+        if not sale:
             return False, "Sale record not found."
             
-        df = df[df["id"] != sale_id]
-        df.to_csv(self.data_file, index=False)
+        total_sale = float(sale_data.get("total_sale", sale.amount))
+        expense = float(sale_data.get("expense", 0))
+        
+        sale.amount = total_sale - expense
+        sale.description = sale_data.get("description", sale.description)
+        
+        date_str = sale_data.get("date")
+        if date_str:
+            try:
+                sale.created_at = datetime.fromisoformat(date_str)
+            except ValueError:
+                pass
+                
+        db.commit()
+        return True, "Physical sale updated successfully."
+
+    def delete_sale(self, db: Session, sale_id_str: str):
+        try:
+            real_id = int(sale_id_str.replace("SALE-", ""))
+        except ValueError:
+            return False, "Invalid sale ID format."
+            
+        sale = db.query(models.PhysicalSale).filter(models.PhysicalSale.id == real_id).first()
+        if not sale:
+            return False, "Sale record not found."
+            
+        db.delete(sale)
+        db.commit()
         return True, "Physical sale deleted successfully."

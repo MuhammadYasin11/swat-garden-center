@@ -30,14 +30,14 @@ function CheckoutContent() {
     } else if (cartItems.length > 0) {
         subtotal = totalPrice;
         if (cartItems.length === 1) {
-            displayName = cartItems[0].plant_name;
+            displayName = cartItems[0].name;
             displayImage = cartItems[0].image_url || displayImage;
         } else {
             displayName = `${cartItems.length} items in cart`;
             displayImage = cartItems[0].image_url || displayImage;
         }
         itemsDescription = cartItems
-            .map((item) => `${item.plant_name} x${item.cart_quantity}`)
+            .map((item) => `${item.name} x${item.cart_quantity}`)
             .join(", ");
     }
 
@@ -73,7 +73,7 @@ function CheckoutContent() {
                 items: itemsDescription
             };
 
-            const response = await fetch("https://swat-garden-center.onrender.com/checkout", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/checkout`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
