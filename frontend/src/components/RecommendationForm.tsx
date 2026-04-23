@@ -30,7 +30,7 @@ export default function RecommendationForm() {
         setRecommendations([]);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/recommend`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/recommend`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

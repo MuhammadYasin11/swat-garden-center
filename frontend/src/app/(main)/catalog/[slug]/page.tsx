@@ -23,7 +23,7 @@ export default function PlantDetailPage() {
   useEffect(() => {
     async function fetchPlants() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/plants`);
         if (!res.ok) return;
         const data = await res.json();
         const found = data.plants.find((p: any) => slugify(p.name) === slug);

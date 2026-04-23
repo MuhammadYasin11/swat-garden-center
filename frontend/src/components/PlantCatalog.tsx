@@ -42,8 +42,8 @@ export default function PlantCatalog({ limit }: PlantCatalogProps = {}) {
         async function fetchCatalogData() {
             try {
                 const [plantsRes, toolsRes] = await Promise.all([
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/tools`)
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/plants`),
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tools`)
                 ]);
 
                 if (!plantsRes.ok || !toolsRes.ok) {

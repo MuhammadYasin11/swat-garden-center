@@ -76,9 +76,9 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const [plantsRes, toolsRes, ordersRes] = await Promise.all([
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/plants`),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/tools`),
-                fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/orders`, {
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/plants`),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/tools`),
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/orders`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -158,8 +158,8 @@ export default function AdminDashboard() {
         try {
             const token = localStorage.getItem("admin_token");
             const url = activeTab === "plants"
-                ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/delete`
-                : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/${encodeURIComponent(itemName)}`;
+                ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/plants/delete`
+                : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/tools/${encodeURIComponent(itemName)}`;
 
             const options: any = {
                 method: "DELETE",
@@ -224,11 +224,11 @@ export default function AdminDashboard() {
 
             const url = isPlant
                 ? isEdit
-                    ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/edit`
-                    : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/add`
+                    ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/plants/edit`
+                    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/plants/add`
                 : isEdit
-                    ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/edit`
-                    : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools`;
+                    ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/tools/edit`
+                    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/tools`;
 
             const res = await fetch(url, {
                 method: isEdit ? "PUT" : "POST",
@@ -264,8 +264,8 @@ export default function AdminDashboard() {
             payload.append("file", file);
 
             const url = targetTab === "plants"
-                ? `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/plants/bulk-import`
-                : `${process.env.NEXT_PUBLIC_API_URL || "https://swat-garden-center.onrender.com"}/admin/tools/bulk-import`;
+                ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/plants/bulk-import`
+                : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/tools/bulk-import`;
 
             const res = await fetch(url, {
                 method: "POST",
