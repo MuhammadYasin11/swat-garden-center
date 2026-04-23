@@ -14,6 +14,12 @@ interface Plant {
     price: number;
     stock_quantity: number;
     expert_score: number;
+    light_requirement?: string;
+    water_frequency?: string;
+    maintenance_level?: string;
+    growth_rate?: string;
+    temp_min?: number;
+    temp_max?: number;
     image_url?: string;
 }
 
@@ -27,19 +33,31 @@ interface Tool {
     image_url?: string;
 }
 
+interface Order {
+    order_id: string;
+    date: string;
+    first_name: string;
+    last_name: string;
+    whatsapp: string;
+    email: string;
+    address: string;
+    total_amount: number;
+    items: string;
+    status: string;
+}
+
 export default function AdminDashboard() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"plants" | "tools">("plants");
     const [plants, setPlants] = useState<Plant[]>([]);
     const [tools, setTools] = useState<Tool[]>([]);
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
 
-    // Form state corresponding to PlantSchema/ToolSchema
     const [formData, setFormData] = useState({
-        name: "", name: "", category: "Foliage", type: "Indoor", type: "Hand Tool",
+        name: "", category: "Foliage", type: "Indoor",
         light_requirement: "Medium", water_frequency: "Weekly",
         maintenance_level: "Medium", growth_rate: "Medium",
         temp_min: 60, temp_max: 85, price: 25, stock_quantity: 50, expert_score: 4.5,
@@ -97,38 +115,36 @@ export default function AdminDashboard() {
 
     const handleDeleteClick = (itemName: string) => setDeleteTarget(itemName);
 
-    const handleEditClick = (item: any) => {
-        const isPlant = !!item.name;
-        const name = isPlant ? item.name : item.name;
+    const handleEditClick = (item: Plant | Tool) => {
+        const isPlant = activeTab === "plants";
+        const name = item.name;
         setActiveTab(isPlant ? "plants" : "tools");
         setEditingItemName(name);
 
         if (isPlant) {
+            const plantItem = item as Plant;
             setFormData(prev => ({
                 ...prev,
-                name: item.name,
-                name: "",
-                category: item.category,
-                type: item.type,
-                type: prev.type,
-                price: item.price,
-                stock_quantity: item.stock_quantity,
-                expert_score: item.expert_score,
-                light_requirement: (item.light_requirement || prev.light_requirement),
-                maintenance_level: (item.maintenance_level || prev.maintenance_level),
-                water_frequency: (item.water_frequency || prev.water_frequency),
+                name: plantItem.name,
+                category: plantItem.category,
+                type: plantItem.type,
+                price: plantItem.price,
+                stock_quantity: plantItem.stock_quantity,
+                expert_score: plantItem.expert_score,
+                light_requirement: (plantItem.light_requirement || prev.light_requirement),
+                maintenance_level: (plantItem.maintenance_level || prev.maintenance_level),
+                water_frequency: (plantItem.water_frequency || prev.water_frequency),
             }));
         } else {
+            const toolItem = item as Tool;
             setFormData(prev => ({
                 ...prev,
-                name: "",
-                name: item.name,
-                category: item.category,
-                type: prev.type,
-                type: item.type,
-                price: item.price,
-                stock_quantity: item.stock_quantity,
-                expert_score: item.expert_score,
+                name: toolItem.name,
+                category: toolItem.category,
+                type: toolItem.type,
+                price: toolItem.price,
+                stock_quantity: toolItem.stock_quantity,
+                expert_score: toolItem.expert_score,
             }));
         }
         setImageFile(null);
@@ -226,7 +242,7 @@ export default function AdminDashboard() {
                 setIsAddModalOpen(false);
                 setEditingItemName(null);
                 fetchData();
-                setFormData({ ...formData, name: "", name: "", price: 25, stock_quantity: 50, image_url: "" });
+                setFormData({ ...formData, name: "", price: 25, stock_quantity: 50, image_url: "" });
                 setImageFile(null);
             } else {
                 const errData = await res.json().catch(() => ({}));
@@ -281,8 +297,8 @@ export default function AdminDashboard() {
     ];
 
     const currentData = activeTab === "plants" ? plants : tools;
-    const filteredData = currentData.filter(item => {
-        const name = (item as any).name || (item as any).name;
+    const filteredData = currentData.filter((item: Plant | Tool) => {
+        const name = item.name;
         return name.toLowerCase().includes(searchTerm.toLowerCase()) || item.category.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
@@ -365,8 +381,8 @@ export default function AdminDashboard() {
                                 <h3 className="font-semibold text-slate-700 mb-4">Orders by Status</h3>
                                 <div className="space-y-3">
                                     {["Pending", "Shipped", "Delivered", "Cancelled"].map((status) => {
-                                        const count = orders.filter((o: any) => o.status === status).length;
-                                        const max = Math.max(...["Pending", "Shipped", "Delivered", "Cancelled"].map(s => orders.filter((o: any) => o.status === s).length), 1);
+                                        const count = orders.filter((o: Order) => o.status === status).length;
+                                        const max = Math.max(...["Pending", "Shipped", "Delivered", "Cancelled"].map(s => orders.filter((o: Order) => o.status === s).length), 1);
                                         const pct = (count / max) * 100;
                                         const colors: Record<string, string> = { Pending: "bg-amber-500", Shipped: "bg-blue-500", Delivered: "bg-emerald-500", Cancelled: "bg-red-500" };
                                         return (
@@ -393,8 +409,8 @@ export default function AdminDashboard() {
                                         const dayRevenue = days.map(date => ({
                                             date,
                                             revenue: orders
-                                                .filter((o: any) => (o.date || "").startsWith(date) && o.status === "Delivered")
-                                                .reduce((s: number, o: any) => s + (Number(o.total_amount) || 0), 0)
+                                                .filter((o: Order) => (o.date || "").startsWith(date) && o.status === "Delivered")
+                                                .reduce((s: number, o: Order) => s + (Number(o.total_amount) || 0), 0)
                                         }));
                                         const maxRev = Math.max(...dayRevenue.map(d => d.revenue), 1);
                                         return dayRevenue.map((d, i) => (
@@ -532,9 +548,9 @@ export default function AdminDashboard() {
                                 <tbody className="divide-y divide-slate-200">
                                     {isLoading ? (
                                         <tr><td colSpan={7} className="text-center py-8 text-slate-400">Loading inventory...</td></tr>
-                                    ) : filteredData.map((item: any, idx: number) => {
-                                        const name = item.name || item.name;
-                                        const type = item.type || item.type;
+                                    ) : filteredData.map((item: Plant | Tool, idx: number) => {
+                                        const name = item.name;
+                                        const type = item.type;
 
                                         return (
                                             <tr key={idx} className="hover:bg-slate-50 transition-colors">
@@ -607,8 +623,8 @@ export default function AdminDashboard() {
                                     <div className="space-y-2 col-span-1 md:col-span-2">
                                         <label className="text-sm font-semibold text-slate-700">{activeTab === "plants" ? "Plant Name" : "Item Name"}</label>
                                         <input type="text" required className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                            value={activeTab === "plants" ? formData.name : formData.name}
-                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, name: e.target.value }) : setFormData({ ...formData, name: e.target.value })}
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
                                             placeholder={activeTab === "plants" ? "e.g. Monstera Deliciosa" : "e.g. Premium Trowel"} />
                                     </div>
 
@@ -621,8 +637,8 @@ export default function AdminDashboard() {
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-slate-700">{activeTab === "plants" ? "Type (Indoor/Outdoor)" : "Type (Hand Tool/Power Tool)"}</label>
                                         <input type="text" required className="w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                                            value={activeTab === "plants" ? formData.type : formData.type}
-                                            onChange={e => activeTab === "plants" ? setFormData({ ...formData, type: e.target.value }) : setFormData({ ...formData, type: e.target.value })} />
+                                            value={formData.type}
+                                            onChange={e => setFormData({ ...formData, type: e.target.value })} />
                                     </div>
 
                                     <div className="space-y-2">
