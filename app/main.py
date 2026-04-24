@@ -376,12 +376,17 @@ def delete_physical_sale(sale_id: str, admin: User = Depends(get_admin_user), db
     return {"message": message}
 
 @app.get("/admin/physical-sales/export")
-def export_physical_sales(admin: User = Depends(get_admin_user), db: Session = Depends(get_db)):
+def export_physical_sales(month: str = None, admin: User = Depends(get_admin_user), db: Session = Depends(get_db)):
     try:
         import uuid
         file_path = f"uploads/export_{uuid.uuid4().hex}.csv"
         df = pd.read_sql_table("physical_sales", engine)
+        if month and not df.empty:
+            df = df[df['date'].str.startswith(month, na=False)]
+        filename = f"physical_sales_{month if month else datetime.now().strftime('%Y%m%d')}.csv"
         df.to_csv(file_path, index=False)
-        return FileResponse(file_path, media_type='text/csv', filename=f"physical_sales_{datetime.now().strftime('%Y%m%d')}.csv")
+        return FileResponse(file_path, media_type='text/csv', filename=filename)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+

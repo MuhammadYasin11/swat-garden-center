@@ -46,6 +46,9 @@ class Order(Base):
 class PhysicalSale(Base):
     __tablename__ = "physical_sales"
     id = Column(Integer, primary_key=True, index=True)
-    amount = Column(Float, nullable=False)
+    date = Column(String, unique=True, index=True, nullable=False)
+    total_sale = Column(Float, nullable=False, default=0.0)
+    expense = Column(Float, nullable=False, default=0.0)
+    net_sale = Column(Float, nullable=False, default=0.0)
     description = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

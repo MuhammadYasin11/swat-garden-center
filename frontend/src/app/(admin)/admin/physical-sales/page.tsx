@@ -23,6 +23,7 @@ export default function PhysicalSalesPage() {
     const [editRecordId, setEditRecordId] = useState<string | null>(null);
     const [deleteSaleId, setDeleteSaleId] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const [activeMonth, setActiveMonth] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0],
@@ -86,7 +87,8 @@ export default function PhysicalSalesPage() {
                 fetchSales();
                 setToast({ message: editRecordId ? "Sale updated." : "Sale added.", type: "success" });
             } else {
-                setToast({ message: `Failed to ${editRecordId ? "update" : "add"} sale record.`, type: "error" });
+                const errData = await response.json();
+                setToast({ message: errData.detail || `Failed to ${editRecordId ? "update" : "add"} sale record.`, type: "error" });
             }
         } catch (error) {
             setToast({ message: "An error occurred.", type: "error" });
@@ -139,10 +141,13 @@ export default function PhysicalSalesPage() {
         });
     };
 
-    const handleExport = async () => {
+    const handleExport = async (monthKey?: string) => {
         try {
             const token = localStorage.getItem("admin_token");
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/physical-sales/export`, {
+            let url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/admin/physical-sales/export`;
+            if (monthKey) url += `?month=${monthKey}`;
+            
+            const response = await fetch(url, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -150,10 +155,10 @@ export default function PhysicalSalesPage() {
 
             if (response.ok) {
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
+                const downloadUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
-                a.href = url;
-                a.download = `physical_sales_${new Date().toISOString().split('T')[0]}.csv`;
+                a.href = downloadUrl;
+                a.download = `physical_sales_${monthKey || new Date().toISOString().split('T')[0]}.csv`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
@@ -186,6 +191,93 @@ export default function PhysicalSalesPage() {
         return acc;
     }, {});
     const monthKeysOrdered = Object.keys(salesByMonth).sort((a, b) => b.localeCompare(a));
+
+    useEffect(() => {
+        if (monthKeysOrdered.length > 0 && !activeMonth) {
+            setActiveMonth(monthKeysOrdered[0]);
+        }
+    }, [monthKeysOrdered, activeMonth]);
+
+    const renderActiveMonth = () => {
+        if (!activeMonth || !salesByMonth[activeMonth]) return null;
+        
+        const [year, month] = activeMonth.split("-");
+        const monthLabel = `${monthNames[month] || month} ${year}`;
+        const monthSales = salesByMonth[activeMonth];
+        const monthRevenue = monthSales.reduce((a, s) => a + (parseFloat(s.total_sale as any) || 0), 0);
+        const monthExpense = monthSales.reduce((a, s) => a + (parseFloat(s.expense as any) || 0), 0);
+        const monthNet = monthSales.reduce((a, s) => a + (parseFloat(s.net_sale as any) || 0), 0);
+
+        return (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-emerald-600" />
+                        {monthLabel} Summary
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-4 text-sm w-full sm:w-auto justify-between sm:justify-end">
+                        <div className="flex gap-4 items-center">
+                            <span className="text-amber-700 font-medium hidden sm:inline">Sales: Rs. {monthRevenue.toFixed(2)}</span>
+                            <span className="text-red-600 font-medium hidden sm:inline">Expense: Rs. {monthExpense.toFixed(2)}</span>
+                            <span className="text-emerald-700 font-bold bg-emerald-100 px-3 py-1 rounded-full">Net: Rs. {monthNet.toFixed(2)}</span>
+                        </div>
+                        <button
+                            onClick={() => handleExport(activeMonth)}
+                            className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                            <Download size={14} />
+                            Export {monthLabel}
+                        </button>
+                    </div>
+                </div>
+                <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
+                        <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-xs border-b border-slate-200">
+                            <tr>
+                                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Date</th>
+                                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Total Sale (Rs.)</th>
+                                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Expense (Rs.)</th>
+                                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Net Sale (Rs.)</th>
+                                <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Description</th>
+                                <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                            {monthSales.map((sale) => (
+                                <tr key={sale.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-4 sm:px-6 py-4 font-semibold text-slate-900">{sale.date}</td>
+                                    <td className="px-4 sm:px-6 py-4 font-medium text-amber-700">{sale.total_sale}</td>
+                                    <td className="px-4 sm:px-6 py-4 font-medium text-red-600">{sale.expense}</td>
+                                    <td className="px-4 sm:px-6 py-4 font-bold text-emerald-700">{sale.net_sale}</td>
+                                    <td className="px-4 sm:px-6 py-4 min-w-[200px] max-w-[300px] whitespace-normal">
+                                        <div className="truncate" title={sale.description}>{sale.description || <span className="text-slate-300 italic">No description</span>}</div>
+                                    </td>
+                                    <td className="px-4 sm:px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => handleEditClick(sale)}
+                                                className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="Edit Sale"
+                                            >
+                                                <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteSaleClick(sale.id)}
+                                                className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete Sale"
+                                            >
+                                                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <AdminProtectedRoute>
@@ -230,7 +322,7 @@ export default function PhysicalSalesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
+                    <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 gap-4">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
@@ -238,16 +330,9 @@ export default function PhysicalSalesPage() {
                             <PlusCircle size={18} />
                             Log New Physical Sale
                         </button>
-                        <button
-                            onClick={handleExport}
-                            className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 bg-slate-800 text-white hover:bg-slate-900 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
-                        >
-                            <Download size={18} />
-                            Export to Excel/CSV
-                        </button>
                     </div>
 
-                    {/* Sales by month: separate section per month */}
+                    {/* Sales by month: separated tabs per month */}
                     {isLoading ? (
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center text-slate-400">
                             Loading records...
@@ -258,75 +343,31 @@ export default function PhysicalSalesPage() {
                             <p className="text-lg font-medium text-slate-500">No physical sales logged yet.</p>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            {monthKeysOrdered.map((monthKey) => {
-                                const [year, month] = monthKey.split("-");
-                                const monthLabel = `${monthNames[month] || month} ${year}`;
-                                const monthSales = salesByMonth[monthKey];
-                                const monthRevenue = monthSales.reduce((a, s) => a + (parseFloat(s.total_sale as any) || 0), 0);
-                                const monthExpense = monthSales.reduce((a, s) => a + (parseFloat(s.expense as any) || 0), 0);
-                                const monthNet = monthSales.reduce((a, s) => a + (parseFloat(s.net_sale as any) || 0), 0);
-                                return (
-                                    <div key={monthKey} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                        <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                                            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                                <Calendar className="w-5 h-5 text-emerald-600" />
-                                                {monthLabel}
-                                            </h2>
-                                            <div className="flex items-center gap-4 text-sm">
-                                                <span className="text-amber-700 font-medium">Sales: Rs. {monthRevenue.toFixed(2)}</span>
-                                                <span className="text-red-600 font-medium">Expense: Rs. {monthExpense.toFixed(2)}</span>
-                                                <span className="text-emerald-700 font-bold">Net: Rs. {monthNet.toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="overflow-x-auto w-full">
-                                            <table className="w-full text-left text-sm text-slate-600 min-w-[800px]">
-                                                <thead className="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-xs border-b border-slate-200">
-                                                    <tr>
-                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Date</th>
-                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Total Sale (Rs.)</th>
-                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Expense (Rs.)</th>
-                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Net Sale (Rs.)</th>
-                                                        <th className="px-4 sm:px-6 py-3 whitespace-nowrap">Description</th>
-                                                        <th className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-200">
-                                                    {monthSales.map((sale, idx) => (
-                                                        <tr key={sale.id} className="hover:bg-slate-50 transition-colors">
-                                                            <td className="px-4 sm:px-6 py-4 font-semibold text-slate-900">{sale.date}</td>
-                                                            <td className="px-4 sm:px-6 py-4 font-medium text-amber-700">{sale.total_sale}</td>
-                                                            <td className="px-4 sm:px-6 py-4 font-medium text-red-600">{sale.expense}</td>
-                                                            <td className="px-4 sm:px-6 py-4 font-bold text-emerald-700">{sale.net_sale}</td>
-                                                            <td className="px-4 sm:px-6 py-4 min-w-[200px] max-w-[300px] whitespace-normal">
-                                                                <div className="truncate" title={sale.description}>{sale.description || <span className="text-slate-300 italic">No description</span>}</div>
-                                                            </td>
-                                                            <td className="px-4 sm:px-6 py-4 text-right">
-                                                                <div className="flex items-center justify-end gap-2">
-                                                                    <button
-                                                                        onClick={() => handleEditClick(sale)}
-                                                                        className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                                        title="Edit Sale"
-                                                                    >
-                                                                        <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleDeleteSaleClick(sale.id)}
-                                                                        className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                                        title="Delete Sale"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        <div className="space-y-4">
+                            {/* Tabs Navigation */}
+                            <div className="flex overflow-x-auto pb-2 space-x-2 scrollbar-hide">
+                                {monthKeysOrdered.map(monthKey => {
+                                    const [y, m] = monthKey.split("-");
+                                    const label = `${monthNames[m] || m} ${y}`;
+                                    const isActive = activeMonth === monthKey;
+                                    return (
+                                        <button
+                                            key={monthKey}
+                                            onClick={() => setActiveMonth(monthKey)}
+                                            className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                                                isActive 
+                                                ? 'bg-emerald-600 text-white shadow-md' 
+                                                : 'bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200'
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Active Month Content */}
+                            {renderActiveMonth()}
                         </div>
                     )}
                 </div>

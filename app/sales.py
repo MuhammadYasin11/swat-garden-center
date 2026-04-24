@@ -7,36 +7,38 @@ class PhysicalSalesManager:
         pass
 
     def get_all_sales(self, db: Session):
-        sales = db.query(models.PhysicalSale).order_by(models.PhysicalSale.created_at.desc()).all()
+        sales = db.query(models.PhysicalSale).order_by(models.PhysicalSale.date.desc()).all()
         result = []
         for s in sales:
             result.append({
                 "id": f"SALE-{s.id}",
-                "date": s.created_at.strftime("%Y-%m-%d") if s.created_at else "",
-                "total_sale": s.amount,
-                "expense": 0.0,
-                "net_sale": s.amount,  # Simplification matching previous logic without expense tracking in db
+                "date": s.date,
+                "total_sale": s.total_sale,
+                "expense": s.expense,
+                "net_sale": s.net_sale,
                 "description": s.description
             })
         return result
 
     def add_sale(self, db: Session, sale_data: dict):
+        date_str = sale_data.get("date")
+        if not date_str:
+            date_str = datetime.now().strftime("%Y-%m-%d")
+
+        existing = db.query(models.PhysicalSale).filter(models.PhysicalSale.date == date_str).first()
+        if existing:
+            return False, f"A record for {date_str} already exists. Please edit it instead."
+
         total_sale = float(sale_data.get("total_sale", 0))
         expense = float(sale_data.get("expense", 0))
-        net_sale = total_sale - expense  # Computed here but DB drops expense
+        net_sale = total_sale - expense
         
-        date_str = sale_data.get("date")
-        dt = None
-        if date_str:
-            try:
-                dt = datetime.fromisoformat(date_str)
-            except ValueError:
-                dt = datetime.now()
-                
         new_sale = models.PhysicalSale(
-            amount=net_sale, # Using net sale for amount to be safe
-            description=sale_data.get("description", ""),
-            created_at=dt
+            date=date_str,
+            total_sale=total_sale,
+            expense=expense,
+            net_sale=net_sale,
+            description=sale_data.get("description", "")
         )
         db.add(new_sale)
         db.commit()
@@ -52,19 +54,18 @@ class PhysicalSalesManager:
         if not sale:
             return False, "Sale record not found."
             
-        total_sale = float(sale_data.get("total_sale", sale.amount))
-        expense = float(sale_data.get("expense", 0))
-        
-        sale.amount = total_sale - expense
+        date_str = sale_data.get("date", sale.date)
+        if date_str != sale.date:
+            existing = db.query(models.PhysicalSale).filter(models.PhysicalSale.date == date_str).first()
+            if existing:
+                return False, f"A record for {date_str} already exists."
+
+        sale.date = date_str
+        sale.total_sale = float(sale_data.get("total_sale", sale.total_sale))
+        sale.expense = float(sale_data.get("expense", sale.expense))
+        sale.net_sale = sale.total_sale - sale.expense
         sale.description = sale_data.get("description", sale.description)
         
-        date_str = sale_data.get("date")
-        if date_str:
-            try:
-                sale.created_at = datetime.fromisoformat(date_str)
-            except ValueError:
-                pass
-                
         db.commit()
         return True, "Physical sale updated successfully."
 

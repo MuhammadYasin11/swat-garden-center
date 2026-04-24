@@ -229,10 +229,19 @@ def migrate_sales(db: Session):
             else:
                 dt = datetime.now()
 
+            date_val = dt.strftime("%Y-%m-%d") if dt else datetime.now().strftime("%Y-%m-%d")
+            
+            # ensure date is unique during migration
+            existing_date = db.query(models.PhysicalSale).filter(models.PhysicalSale.date == date_val).first()
+            if existing_date:
+                continue # skip duplicate days in migration
+                
             new_sale = models.PhysicalSale(
-                amount=amount,
-                description=desc,
-                created_at=dt
+                date=date_val,
+                total_sale=amount,
+                expense=0.0,
+                net_sale=amount,
+                description=desc
             )
             db.add(new_sale)
             count += 1
